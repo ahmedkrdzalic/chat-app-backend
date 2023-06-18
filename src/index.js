@@ -1,49 +1,53 @@
+require("dotenv").config();
 const express = require("express");
 const app = express();
 const http = require("http");
 const cors = require("cors");
 const { Server } = require("socket.io");
+const cookieParaser = require("cookie-parser");
+const connectDB = require("./databases/mongodb");
 
 const server = http.createServer(app);
 const io = new Server(server, {
   cors: {
     origin: "*",
-    // methods: ["GET", "POST"]
   },
 });
 
-// app.use((req, res, next) => {
-//   const token = req.query.token;
+app.use(express.json());
+app.use(cookieParaser());
 
-//   // Validate the token here (e.g., verify signature, check expiration)
-//   // If the token is invalid, you can respond with an error or send a 401 Unauthorized status
+app.use(
+  cors({
+    credentials: true,
+  })
+);
 
-//   // If the token is valid, you can attach the decoded token or relevant user information to the request object
-//   // For example: req.user = decodedToken;
+connectDB();
 
-//   next();
+//Routes
+const usersRouter = require("./routes/Users");
+app.use("/users", usersRouter);
+const roomsRouter = require("./routes/Rooms");
+app.use("/rooms", roomsRouter);
+
+// io.on("connection", (socket) => {
+//   console.log(`User Connected: ${socket.id}`);
+
+//   socket.on("join_room", (data) => {
+//     socket.join(data);
+//     console.log(`User with ID: ${socket.id} joined room: ${data}`);
+//   });
+
+//   socket.on("send_message", (data) => {
+//     socket.to(data.room).emit("receive_message", data);
+//   });
+
+//   socket.on("disconnect", () => {
+//     console.log("User Disconnected", socket.id);
+//   });
 // });
 
-// io.use((socket, next) => {
-//   const token = socket.handshake.query.token;
-
-//   // Validate the token here (e.g., verify signature, check expiration)
-//   // If the token is invalid, call `next(new Error('Invalid token'))` to reject the connection
-
-//   // If the token is valid, you can attach the decoded token or relevant user information to the socket object
-//   // For example: socket.user = decodedToken;
-
-//   next();
-// });
-
-io.on("connection", (socket) => {
-  console.log(`User with id:${socket.id} has been connected`);
-
-  socket.on("disconnect", () => {
-    console.log(`User with id:${socket.id} has been disconnected`);
-  });
-});
-
-server.listen(4000, () => {
-  console.log("Server is running");
+server.listen(process.env.PORT, () => {
+  console.log(`Server is running on: ${process.env.PORT} 💯`);
 });
