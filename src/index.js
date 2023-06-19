@@ -6,6 +6,7 @@ const cors = require("cors");
 const { Server } = require("socket.io");
 const cookieParaser = require("cookie-parser");
 const connectDB = require("./databases/mongodb");
+const { validateToken } = require("./services/JWT");
 
 const server = http.createServer(app);
 const io = new Server(server, {
@@ -23,6 +24,14 @@ app.use(
   })
 );
 
+//migrate sign in and sign up to separate router
+const signRouter = require("./routes/Sign");
+app.use("/sign", signRouter);
+
+//token validation middleware
+app.use(validateToken);
+
+//connect to database
 connectDB();
 
 //Routes
