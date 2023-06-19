@@ -3,6 +3,7 @@ const router = express.Router();
 const bcrypt = require("bcrypt");
 const User = require("../models/user/User");
 const { registrationValidation } = require("../services/Validations");
+const { createToken } = require("../services/JWT");
 
 router.post("/registration", async (req, res) => {
   const data = req.body;
@@ -29,13 +30,41 @@ router.post("/registration", async (req, res) => {
       if (user_res) {
         return res.status(200).send("SUCCESS");
       } else {
-        return res.status(400).send(`ERROR: ${user_res}`);
+        return res.status(400).json({ error: `ERROR: ${user_res}` });
       }
     } catch (error) {
       //duplicate key error
       if (error.code === 11000)
         return res.status(400).send(`ERROR: Email already exists`);
-      else return res.status(400).send(`ERROR: ${user_res}`);
+      else return res.status(400).json({ error: `ERROR: ${user_res}` });
+    }
+  });
+});
+
+router.post("/login", async (req, res) => {
+  const data = req.body;
+  const email = data.email;
+  const password = data.password;
+
+  const user = await User.findOne({ email });
+
+  if (!user) return res.status(400).json({ error: "User does not exist!" });
+
+  bcrypt.compare(password, user.password).then((match) => {
+    if (!match) {
+      return res
+        .status(400)
+        .json({ error: "Wrong username and password combination!" });
+    } else {
+      const accessToken = createToken(user);
+
+      //30 days
+      return res
+        .cookie("token", accessToken, {
+          maxAge: 2592000000,
+          httpOnly: true,
+        })
+        .json({ user: { username: user.username, id: user.id } });
     }
   });
 });
