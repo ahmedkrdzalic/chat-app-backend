@@ -7,10 +7,12 @@ router.get("/profile", async (req, res) => {
   const user = await User.findOne({ _id: userId })
     .then(function (user) {
       return res.json({
-        _id: user._id,
-        name: user.name,
-        surname: user.surname,
-        email: user.email,
+        user: {
+          _id: user._id,
+          name: user.name,
+          surname: user.surname,
+          email: user.email,
+        },
       });
     })
     .catch(function (err) {

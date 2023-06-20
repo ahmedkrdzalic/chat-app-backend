@@ -28,14 +28,14 @@ router.post("/registration", async (req, res) => {
       });
 
       if (user_res) {
-        return res.status(200).send("SUCCESS");
+        return res.status(200).json("SUCCESS");
       } else {
         return res.status(400).json({ error: `ERROR: ${user_res}` });
       }
     } catch (error) {
       //duplicate key error
       if (error.code === 11000)
-        return res.status(400).send(`ERROR: Email already exists`);
+        return res.status(400).json({ error: `ERROR: Email already exists` });
       else return res.status(400).json({ error: `ERROR: ${user_res}` });
     }
   });
@@ -62,9 +62,8 @@ router.post("/login", async (req, res) => {
       return res
         .cookie("token", accessToken, {
           maxAge: 2592000000,
-          httpOnly: true,
         })
-        .json({ user: { username: user.username, id: user.id } });
+        .json({ user: { email: user.email, _id: user._id } });
     }
   });
 });
