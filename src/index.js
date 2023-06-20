@@ -7,6 +7,7 @@ const { Server } = require("socket.io");
 const cookieParaser = require("cookie-parser");
 const connectDB = require("./databases/mongodb");
 const { validateToken } = require("./services/JWT");
+const { verify } = require("jsonwebtoken");
 
 const server = http.createServer(app);
 const io = new Server(server, {
@@ -41,22 +42,44 @@ app.use("/users", usersRouter);
 const roomsRouter = require("./routes/Rooms");
 app.use("/rooms", roomsRouter);
 
-// io.on("connection", (socket) => {
-//   console.log(`User Connected: ${socket.id}`);
+//authorization middleware with getting user token from cookie headers
+io.use((socket, next) => {
+  const token = socket.handshake.auth.token;
 
-//   socket.on("join_room", (data) => {
-//     socket.join(data);
-//     console.log(`User with ID: ${socket.id} joined room: ${data}`);
-//   });
+  if (!token) {
+    next(new Error("Unauthorized!"));
+  }
 
-//   socket.on("send_message", (data) => {
-//     socket.to(data.room).emit("receive_message", data);
-//   });
+  // console.log(token);
 
-//   socket.on("disconnect", () => {
-//     console.log("User Disconnected", socket.id);
-//   });
-// });
+  try {
+    const isValid = verify(token, process.env.JWT_SECRET);
+    if (isValid) {
+      // console.log("Authenticated");
+      return next();
+    }
+  } catch (error) {
+    console.log("Not authenticated");
+    next(new Error(JSON.stringify(error)));
+  }
+});
+
+io.on("connection", (socket) => {
+  console.log(`User Connected: ${socket.id}`);
+
+  socket.on("join_room", (data) => {
+    socket.join(data);
+    console.log(`User with ID: ${socket.id} joined room: ${data}`);
+  });
+
+  socket.on("send_message", (data) => {
+    socket.to(data.room).emit("receive_message", data);
+  });
+
+  socket.on("disconnect", () => {
+    console.log("User Disconnected", socket.id);
+  });
+});
 
 server.listen(process.env.PORT, () => {
   console.log(`Server is running on: ${process.env.PORT} 💯`);
