@@ -60,6 +60,7 @@ io.use((socket, next) => {
     const isValid = verify(token, process.env.JWT_SECRET);
     if (isValid) {
       // console.log("Authenticated");
+      socket.request.user = isValid;
       return next();
     }
   } catch (error) {
@@ -67,6 +68,8 @@ io.use((socket, next) => {
     next(new Error(JSON.stringify(error)));
   }
 });
+
+let onlineUsers = [];
 
 io.on("connection", (socket) => {
   console.log(`User Connected: ${socket.id}`);
@@ -101,11 +104,26 @@ io.on("connection", (socket) => {
   });
 
   socket.on("leave_room", (data) => {
+    socket.leave(data);
     console.log(`User with ID: ${socket.id} left room: ${data}`);
   });
 
+  // add new user
+  if (!onlineUsers.some((user) => user._id === socket.request.user)) {
+    // if user is not added before
+    onlineUsers.push({
+      _id: socket.request.user._id,
+      email: socket.request.user.email,
+      socketId: socket.id,
+    });
+    // send all active users to new user
+    io.emit("get-users", onlineUsers);
+  }
+
   socket.on("disconnect", () => {
-    console.log("User Disconnected", socket.id);
+    onlineUsers = onlineUsers.filter((user) => user.socketId !== socket.id);
+    // send all online users to all users
+    io.emit("get-users", onlineUsers);
   });
 });
 
