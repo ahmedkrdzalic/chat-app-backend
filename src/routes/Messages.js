@@ -22,7 +22,7 @@ router.get("/room/:id", async (req, res) => {
   const roomId = req.params.id;
   if (!roomId) return res.status(400).json({ error: "Room id not provided" });
   const roomMessages = await Message.find({ "room._id": roomId }, null, {
-    sort: { time: 1 },
+    sort: { time: -1 },
     limit: 3,
   });
   return res.json(roomMessages);
