@@ -8,6 +8,7 @@ const cookieParaser = require("cookie-parser");
 const connectDB = require("./databases/mongodb");
 const { validateToken } = require("./services/JWT");
 const { verify } = require("jsonwebtoken");
+const Message = require("./models/message/Message");
 
 const server = http.createServer(app);
 const io = new Server(server, {
@@ -42,7 +43,6 @@ app.use("/users", usersRouter);
 const roomsRouter = require("./routes/Rooms");
 app.use("/rooms", roomsRouter);
 const messagesRouter = require("./routes/Messages");
-const Message = require("./models/message/Message");
 app.use("/messages", messagesRouter);
 
 //authorization middleware with getting user token from cookie headers
@@ -76,9 +76,14 @@ io.on("connection", (socket) => {
   });
 
   socket.on("send_message", async (data) => {
+    console.log(data);
     Message.create(data).then((message) => {
       socket.to(data.room).emit("receive_message", data);
     });
+  });
+
+  socket.on("leave_room", (data) => {
+    console.log(`User with ID: ${socket.id} left room: ${data}`);
   });
 
   socket.on("disconnect", () => {
