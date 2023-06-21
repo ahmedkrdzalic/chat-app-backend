@@ -43,6 +43,7 @@ app.use("/users", usersRouter);
 const roomsRouter = require("./routes/Rooms");
 app.use("/rooms", roomsRouter);
 const messagesRouter = require("./routes/Messages");
+const redis = require("./databases/redis-client");
 app.use("/messages", messagesRouter);
 
 //authorization middleware with getting user token from cookie headers
@@ -76,7 +77,24 @@ io.on("connection", (socket) => {
   });
 
   socket.on("send_message", async (data) => {
-    console.log(data);
+    //using token as key and incrementing it by 1 every time user sends a message
+    let redis_result = await redis.incr(socket.handshake.auth.token);
+
+    let ttl;
+    //when user starts sending messages, we set the key to expire in 60 seconds
+    if (redis_result === 1) {
+      ttl = await redis.expire(socket.handshake.auth.token, 60);
+      ttl = 60;
+    } else {
+      //if user has sent messages before, we get the time to see how much time is left
+      ttl = await redis.ttl(socket.handshake.auth.token);
+    }
+
+    //if user has sent more than 20 messages in 60 seconds, we emit an error and stop the user from sending more messages
+    if (redis_result > 20 && ttl > 0) {
+      socket.emit("error", "You are sending too many messages");
+    }
+
     Message.create(data).then((message) => {
       socket.to(data.room).emit("receive_message", data);
     });

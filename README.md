@@ -10,3 +10,4 @@ Some of the late notices form my side and what I would do differently if I had m
 - It was too late that I realised that the auth for the Socket.io is different, I thouhgt that i can use tokens in headers
 - I would use some library (or even build my custom logging into the MongoDB) for the logging
 - I would store JWTs in Redis to manage how many devices is user using and to be able to log out from all devices
+- add rate limiting on login and register too where i would use ip address as a key
