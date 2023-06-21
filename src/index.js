@@ -41,6 +41,9 @@ const usersRouter = require("./routes/Users");
 app.use("/users", usersRouter);
 const roomsRouter = require("./routes/Rooms");
 app.use("/rooms", roomsRouter);
+const messagesRouter = require("./routes/Messages");
+const Message = require("./models/message/Message");
+app.use("/messages", messagesRouter);
 
 //authorization middleware with getting user token from cookie headers
 io.use((socket, next) => {
@@ -72,8 +75,10 @@ io.on("connection", (socket) => {
     console.log(`User with ID: ${socket.id} joined room: ${data}`);
   });
 
-  socket.on("send_message", (data) => {
-    socket.to(data.room).emit("receive_message", data);
+  socket.on("send_message", async (data) => {
+    Message.create(data).then((message) => {
+      socket.to(data.room).emit("receive_message", data);
+    });
   });
 
   socket.on("disconnect", () => {
