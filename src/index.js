@@ -99,7 +99,6 @@ io.on("connection", (socket) => {
     }
 
     Message.create(data).then((message) => {
-      console.log(data);
       socket.to(data.room._id).emit("receive_message", data);
     });
   });
