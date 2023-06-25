@@ -74,6 +74,9 @@ let onlineUsers = [];
 io.on("connection", (socket) => {
   console.log(`User Connected: ${socket.id}`);
 
+  //join to user's own room to receive privete messages
+  socket.join(socket.request.user._id);
+
   socket.on("join_room", (data) => {
     socket.join(data);
     console.log(`User with ID: ${socket.id} joined room: ${data}`);

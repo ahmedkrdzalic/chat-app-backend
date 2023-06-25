@@ -1,5 +1,6 @@
 const express = require("express");
 const Message = require("../models/message/Message");
+const User = require("../models/user/User");
 const router = express.Router();
 
 router.get("/", async (req, res) => {
@@ -21,7 +22,20 @@ router.get("/:id", async (req, res) => {
 router.get("/room/:id", async (req, res) => {
   const roomId = req.params.id;
   if (!roomId) return res.status(400).json({ error: "Room id not provided" });
-  const roomMessages = await Message.find({ "room._id": roomId }, null, {
+  const isUser = User.findById(roomId);
+
+  let filter = {};
+
+  if (!isUser) {
+    filter = { "room._id": roomId };
+    console.log("not user");
+  } else {
+    console.log("user");
+    filter.$or = [{ "room._id": roomId }, { "room._id": req.user._id }];
+  }
+
+  console.log(filter);
+  const roomMessages = await Message.find(filter, null, {
     sort: { time: -1 },
     limit: 3,
   });
