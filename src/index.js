@@ -130,6 +130,6 @@ io.on("connection", (socket) => {
   });
 });
 
-server.listen(process.env.PORT, () => {
+server.listen(process.env.PORT || 443, () => {
   console.log(`Server is running on: ${process.env.PORT} 💯`);
 });
