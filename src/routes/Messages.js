@@ -28,13 +28,10 @@ router.get("/room/:id", async (req, res) => {
 
   if (!isUser) {
     filter = { "room._id": roomId };
-    console.log("not user");
   } else {
-    console.log("user");
     filter.$or = [{ "room._id": roomId }, { "room._id": req.user._id }];
   }
 
-  console.log(filter);
   const roomMessages = await Message.find(filter, null, {
     sort: { time: -1 },
     limit: 3,

@@ -9,6 +9,7 @@ const connectDB = require("./databases/mongodb");
 const { validateToken } = require("./services/JWT");
 const { verify } = require("jsonwebtoken");
 const Message = require("./models/message/Message");
+const redis = require("./databases/redis-client");
 
 const server = http.createServer(app);
 const io = new Server(server, {
@@ -43,7 +44,6 @@ app.use("/users", usersRouter);
 const roomsRouter = require("./routes/Rooms");
 app.use("/rooms", roomsRouter);
 const messagesRouter = require("./routes/Messages");
-const redis = require("./databases/redis-client");
 app.use("/messages", messagesRouter);
 
 //authorization middleware with getting user token from cookie headers
@@ -97,7 +97,7 @@ io.on("connection", (socket) => {
     }
 
     //if user has sent more than 20 messages in 60 seconds, we emit an error and stop the user from sending more messages
-    if (redis_result > 20 && ttl > 0) {
+    if (redis_result > 5 && ttl > 0) {
       socket.emit("error", "You are sending too many messages");
     }
 
