@@ -2,5 +2,6 @@ version: "3.8"
 services:
   backend:
     build: .
+    container_name: backend_chat_app
     ports:
       - "4000:4000"
