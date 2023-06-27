@@ -75,8 +75,9 @@ router.get("/logout", validateToken, async (req, res) => {
 
   res
     .cookie("token", token, {
+      secure: true,
+      sameSite: "none",
       maxAge: -1000,
-      httpOnly: true,
     })
     .status(200)
     .json({ msg: "logout success" });
