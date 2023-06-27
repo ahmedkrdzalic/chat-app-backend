@@ -22,7 +22,9 @@ router.get("/:id", async (req, res) => {
 router.get("/room/:id", async (req, res) => {
   const roomId = req.params.id;
   if (!roomId) return res.status(400).json({ error: "Room id not provided" });
-  const isUser = User.findById(roomId);
+  const isUser = await User.findById(roomId);
+
+  console.log(isUser);
 
   let filter = {};
 
@@ -32,6 +34,7 @@ router.get("/room/:id", async (req, res) => {
     filter.$or = [{ "room._id": roomId }, { "room._id": req.user._id }];
   }
 
+  console.log(filter);
   const roomMessages = await Message.find(filter, null, {
     sort: { time: -1 },
     limit: 3,

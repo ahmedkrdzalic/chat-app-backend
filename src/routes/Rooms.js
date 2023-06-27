@@ -16,6 +16,7 @@ router.get("/:id", async (req, res) => {
   return res.json(room);
 });
 
+//create new room
 router.post("/", async (req, res) => {
   const room = req.body;
   if (!room)
@@ -25,7 +26,7 @@ router.post("/", async (req, res) => {
   });
   if (!roomRes) return res.status(404).json({ error: "Room not created" });
 
-  return res.status(200).json(room);
+  return res.status(200).json(roomRes);
 });
 
 module.exports = router;
