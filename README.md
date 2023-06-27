@@ -1,6 +1,12 @@
 This is the backend part of the chat app.
 I am using Node.js, Express.js, Socket.io and MongoDB for the main technologies.
 
+Note: If using this app, open it with Chrome. I didn't test it on other browsers.
+Links:
+
+- [Frontend](https://chat-app-frontend-ak-c3cf052f8812.herokuapp.com/)
+- [Backend](https://chat-app-backend-ak-23709ad0c006.herokuapp.com/)
+
 Run this app:
 
 Dockerized:
@@ -36,6 +42,7 @@ Some of the late notices from my side and what I would do differently if I had m
 - I would add even more comments (but it is pretty simple app so I think that it is not necessary, and variable names are pretty self-explanatory)
 - I would add some more error handling
 - I would use API keys for the mongo and redis connection URIs
+- At the end, the deployment of the app made me change a logic of socket.io auth and it is not the best solution, but it works for this occasion (I would definitely consider different approach for the real app)
 
 Note:
 
