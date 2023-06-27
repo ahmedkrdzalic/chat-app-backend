@@ -65,7 +65,9 @@ router.post("/login", async (req, res) => {
           sameSite: "none",
           maxAge: 2592000000,
         })
-        .json({ user: { email: user.email, _id: user._id } });
+        .json({
+          user: { email: user.email, _id: user._id, token: accessToken },
+        });
     }
   });
 });
